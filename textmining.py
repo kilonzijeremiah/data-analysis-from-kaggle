@@ -50,7 +50,7 @@ print("Starting text cleaning... (this may take 30–90 seconds)")
 
 df['clean_text'] = df['FORMATTED_CONTENT'].apply(clean_text)
 
-print("✅ Text cleaning completed!")
+print(" Text cleaning completed!")
 
 # Show before vs after
 print("\n=== Before & After Cleaning ===")
