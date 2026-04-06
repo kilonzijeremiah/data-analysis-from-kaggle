@@ -1,52 +1,57 @@
-from newspaper import Article, Config
-from textblob import TextBlob
-from bs4 import BeautifulSoup
 import requests
+from bs4 import BeautifulSoup
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 import streamlit as st
+import pandas as pd
+import matplotlib.pyplot as plt
 
-config = Config()
-config.browser_user_agent = "Mozilla/5.0"
+st.title("📰 News Sentiment Analysis")
 
 url = "https://www.nationmedia.com/news/business-daily-fetes-top-40-40-men-nairobi-gala/"
 
-article = Article(url, config=config)
-article.download()
-article.parse()
+# ----------------------------
+# SCRAPING
+# ----------------------------
+headers = {"User-Agent": "Mozilla/5.0"}
+response = requests.get(url, headers=headers)
 
-st.title(article.title)
-st.write(article.text[:500])
-
-# FIX: define soup properly
-response = requests.get(url, headers={"User-Agent": "Mozilla/5.0"})
 soup = BeautifulSoup(response.text, "html.parser")
 
 text = " ".join([p.get_text() for p in soup.find_all("p")])
 
-analysis = TextBlob(text)
+# Show article preview
+st.subheader("📄 Article Preview")
+st.write(text[:500])
 
-st.write("Polarity:", analysis.sentiment.polarity)
-st.write("Subjectivity:", analysis.sentiment.subjectivity)
-
+# ----------------------------
+# SENTIMENT ANALYSIS (VADER)
+# ----------------------------
 analyzer = SentimentIntensityAnalyzer()
 scores = analyzer.polarity_scores(text)
 
-st.write("Sentiment Scores:", scores)
+# Display scores
+st.subheader("📊 Sentiment Scores")
+st.write(scores)
 
+# Classification
 if scores['compound'] >= 0.05:
-    st.write("Sentiment: Positive 😊")
+    st.success("Sentiment: Positive 😊")
 elif scores['compound'] <= -0.05:
-    st.write("Sentiment: Negative 😞")
+    st.error("Sentiment: Negative 😞")
 else:
-    st.write("Sentiment: Neutral 😐")
+    st.info("Sentiment: Neutral 😐")
 
-import pandas as pd
-import matplotlib.pyplot as plt
+# ----------------------------
+# VISUALIZATION
+# ----------------------------
+st.subheader("📈 Sentiment Visualization")
 
-# FIX: create dataframe for plotting
 df = pd.DataFrame([scores])
 
 fig, ax = plt.subplots()
-df[['pos', 'neg', 'neu']].iloc[0].plot(kind='bar', ax=ax)
+df[['pos', 'neu', 'neg']].iloc[0].plot(kind='bar', ax=ax)
+
+ax.set_ylabel("Score")
+ax.set_title("Sentiment Breakdown")
 
 st.pyplot(fig)
