@@ -5,13 +5,10 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 
-st.title("📰 News Sentiment Analysis")
+st.title(" News Sentiment Analysis")
 
 url = "https://www.nationmedia.com/news/business-daily-fetes-top-40-40-men-nairobi-gala/"
 
-# ----------------------------
-# SCRAPING
-# ----------------------------
 headers = {"User-Agent": "Mozilla/5.0"}
 response = requests.get(url, headers=headers)
 
@@ -23,9 +20,7 @@ text = " ".join([p.get_text() for p in soup.find_all("p")])
 st.subheader("📄 Article Preview")
 st.write(text[:500])
 
-# ----------------------------
-# SENTIMENT ANALYSIS (VADER)
-# ----------------------------
+
 analyzer = SentimentIntensityAnalyzer()
 scores = analyzer.polarity_scores(text)
 
@@ -41,9 +36,6 @@ elif scores['compound'] <= -0.05:
 else:
     st.info("Sentiment: Neutral 😐")
 
-# ----------------------------
-# VISUALIZATION
-# ----------------------------
 st.subheader("📈 Sentiment Visualization")
 
 df = pd.DataFrame([scores])
